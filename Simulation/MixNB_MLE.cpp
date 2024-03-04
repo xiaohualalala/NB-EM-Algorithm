@@ -4,6 +4,12 @@
 using namespace Rcpp;
 using namespace arma;
 
+NumericVector reorder(NumericVector vec, NumericVector ord){ 
+  int n(vec.size());
+  NumericVector reord(n);
+  for(int i=0;i<n;i++) reord[i]=vec[ord[i]-1];
+  return reord;
+}
 arma::vec vec2arma(Rcpp::NumericVector x)
 {
     return arma::vec(x.begin(), x.size(), false); // this code originate from P159 Seamless Rcpp

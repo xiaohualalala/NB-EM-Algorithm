@@ -1,0 +1,54 @@
+---
+title: "EM算法模拟"
+output: html_document
+---
+
+## 准备工作
+
+首先，加载必要的R包和源代码文件
+
+```{r setup, include=TRUE}
+library(Rcpp)
+library(ggplot2)
+
+sourceCpp("Generate_Samples.cpp") # 生成样本
+sourceCpp("SimulateNB.cpp") # 估计负二项分布
+
+# 设置随机数种子
+set.seed(123)
+
+```
+
+## 负二项分布模型
+```{r}
+# 定义参数
+prob_values = seq(0.2, 0.8, 0.2) # 定义概率参数
+size_values = seq(1, 9, 2) # 定义离散参数
+# 执行模拟
+res_NB = SimulateNBs(prob_values, size_values, 20, 2000)
+res_NB
+```
+
+结果分析
+
+模拟数据：
+
+概率参数从0.2到0.8以0.2为间隔，以及离散参数从1到9以2为间隔，每个参数配置下生成20组样本，每个样本包含2000个数据点
+
+模拟结果:
+
+参数估计精度：通过比较avg_prob和avg_size与其各自的理论值，可以看出EM-NB算法能够较准确地估计负二项分布的参数，表明算法对于不同的概率和分布离散度具有良好的适应性和准确性；
+
+稳定性分析：随着分布离散度(size)的增加，标准差sd_prob和sd_size通常表现出较小的变异，尤其是在高概率(prob = 0.8)设置下，表明尽管离散度增加，算法仍能稳定地估计参数；
+
+收敛性能：观察avg_t和sd_t指标发现，算法的收敛速度受到概率和离散参数的影响。特别是在低概率和高离散度的情况下，算法需要更多的迭代次数来达到收敛；
+
+```{r}
+ggplot(res_NB, aes(x = as.factor(size), y = as.factor(prob))) +
+  geom_tile(aes(fill = avg_t)) +
+  scale_fill_gradient(low = "#ffeda0", high = "#f03b20") +
+  labs(x = "Size", y = "Probability", fill = "Iterations") + 
+  theme_minimal() +
+  ggtitle("Mean of Iterations Across Different Parameters")
+```
+

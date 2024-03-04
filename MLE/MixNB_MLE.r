@@ -67,7 +67,7 @@ mixNB_MLE <- function(X, nbS, avg = NULL, var = NULL, iterMax = 15000, EPSILON =
         for (i in 1:nbS) {
             for (j in 1:nbT) {
                 Dmat[i, j] <- eSize[i] * (digamma(eSize[i] + X[j]) - digamma(eSize[i]))
-                Pmat[i, j] <- eWeight[i] * dnbinom(X[j], size = eSize[i], prob = eProb[i])                
+                Pmat[i, j] <- eWeight[i] * dnbinom(X[j], size = eSize[i], prob = eProb[i])
             }
         }
 
@@ -95,7 +95,14 @@ mixNB_MLE <- function(X, nbS, avg = NULL, var = NULL, iterMax = 15000, EPSILON =
             eWeight <- prevParam[, 3]
             break
         }
-
+        
+        # reorder estimated parameters
+        ordAvg <- order(esAvg)
+        esAvg <- esAvg[ordAvg]
+        eSize <- eSize[ordAvg]
+        eWeight <- eWeight[ordAvg]
+        eProb <- eProb[ordAvg]
+        esVar <- esVar[ordAvg]
         newParam <- cbind(esAvg = esAvg, eSize = eSize, eWeight = eWeight) # update iterative parameters
 
         # Check for convergence
@@ -125,11 +132,11 @@ mixNB_MLE <- function(X, nbS, avg = NULL, var = NULL, iterMax = 15000, EPSILON =
     if (verbose) {
         cat("Computational iterations:", iter, "\n")
         cat("Computational time:", minutes, "minutes \n")
-    }
 
-    # Output estimated results
-    cat("\nEstimate Results:")
-    print(knitr::kable(res_df, align = "c", format = "simple"))
+        # estimated results
+        cat("\nEstimate Results:")
+        print(knitr::kable(res_df, align = "c", format = "simple"))
+    }
 
     return(parameter)
 }
